@@ -19,9 +19,9 @@ def generate_lyrics(artist_name, track_name):
 def billboard_to_lyrics(input_dict):
     #{rank1: {song: "title", artist: "artist", ...}, rank2:}
     for rank in input_dict:
-        artist = input_dict[ranks]["song"]
-        track = input_dict[ranks]["artist"]
-        input_dict[ranks][lyrics] = generate_lyrics(artist, track)
+        artist = input_dict[rank]["song"]
+        track = input_dict[rank]["artist"]
+        input_dict[rank][lyrics] = generate_lyrics(artist, track)
 
 def db_add_dict(input_dict, database_name='songs_database.db'):
     connection = sqlite3.connect(database_name)
@@ -35,15 +35,17 @@ def db_add_dict(input_dict, database_name='songs_database.db'):
             lyrics TEXT
         )
     ''')
-    
-    for rank, data in input_dict.items():
+
+    for item in range(count, count + 25):
+        rank = input_dict[i]
+        song = input_dict[i]["song"]
+        artist = input_dict[i]["artist"]
+        lyrics = input_dict[i]["lyrics"]
+
         cursor.execute('''
             INSERT INTO songs (rank, song, artist, lyrics)
             VALUES (?, ?, ?, ?)
         ''', (rank, data["song"], data["artist"], data.get("lyrics", "")))
-
-    connection.commit()
-    connection.close()
 
 
 
