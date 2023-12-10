@@ -31,7 +31,7 @@ def insert_dbs(cur, conn):
 
 def plot_lyrics_count(cur, conn):
     cur.execute('''
-        SELECT Billboard.song, Lyrics.count
+        SELECT Billboard.id, Lyrics.count
         FROM Billboard
         JOIN Lyrics ON Billboard.id = Lyrics.id
     ''')
@@ -43,15 +43,17 @@ def plot_lyrics_count(cur, conn):
     songs, counts = zip(*data)
 
     # Plotting the bar plot
-    plt.figure(figsize=(12, 8))
-    bar_width = 0.6
-    plt.bar(songs, counts, color='skyblue', width = bar_width)
-    plt.xlabel('Song')
+    plt.figure(figsize=(20, 8))
+    bar_width = 0.4
+    x_ticks = range(1, 101)
+    plt.bar(songs, counts, color='skyblue', align="edge", width=bar_width)
+    plt.xlabel('Song ID')
     plt.ylabel('Count')
     plt.title('Lyrics Count for Billboard Songs')
-    plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+    plt.xticks(x_ticks, rotation=45, ha='right')  # Set explicit x-ticks
     plt.tight_layout()
     plt.show()
+
 
 def main():
     cur, conn = set_up_database()
