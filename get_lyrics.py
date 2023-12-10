@@ -67,6 +67,8 @@ def insert_lyrics(cur, conn):
             "INSERT INTO Lyrics (count) VALUES (?)",
             (count, )
         )
+    print(
+        f"Added lyric count for billboard songs {start + 1} - {start + 25} to database")
 
     conn.commit()
 
