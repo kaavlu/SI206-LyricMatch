@@ -9,25 +9,6 @@ def set_up_database():
     cur = conn.cursor()
     return cur, conn
 
-def create_table(cur, conn):
-    """Create table if it does not yet exist"""
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS Billboard_and_Lyrics (id INTEGER PRIMARY KEY AUTOINCREMENT, artist TEXT, song TEXT, count INTEGER)"
-    )
-    conn.commit()
-
-def insert_dbs(cur, conn):
-    cur.execute('SELECT * FROM Billboard')
-    for row in cur.fetchall():
-        id, artist, song = row
-        cur.execute('INSERT INTO Billboard_and_Lyrics (id, artist, song) VALUES (?, ?, ?)', (id, artist, song))
-
-    cur.execute('SELECT * FROM Lyrics')
-    for row in cur.fetchall():
-        id, count = row
-        cur.execute('UPDATE Billboard_and_Lyrics SET count = ? WHERE id = ?', (count, id))
-
-    conn.commit()
 
 def plot_lyrics_count(cur, conn):
     cur.execute('''
@@ -43,10 +24,10 @@ def plot_lyrics_count(cur, conn):
     songs, counts = zip(*data)
 
     # Plotting the bar plot
-    plt.figure(figsize=(20, 8))
+    plt.figure(figsize=(20, 8)) 
     bar_width = 0.4
     x_ticks = range(1, 101)
-    plt.bar(songs, counts, color='skyblue', align="edge", width=bar_width)
+    plt.bar(songs, counts, color='skyblue', align="center", width=bar_width)
     plt.xlabel('Song ID')
     plt.ylabel('Count')
     plt.title('Lyrics Count for Billboard Songs')
@@ -54,11 +35,44 @@ def plot_lyrics_count(cur, conn):
     plt.tight_layout()
     plt.show()
 
+def plot_pie_chart(cur, conn):
+    cur.execute('''
+        SELECT Billboard.id, Lyrics.count
+        FROM Billboard
+        JOIN Lyrics ON Billboard.id = Lyrics.id
+    ''')
+
+    # Fetch the data
+    data = cur.fetchall()
+
+    # Separate the data into two lists for x and y axes
+    songs, counts = zip(*data)
+
+    labels = ["0-250", "251-500", '501-750', "751+"]
+    sizes = [0, 0, 0, 0]
+
+    for count in counts:
+        if count <= 250:
+            sizes[0] += 1
+        elif count <= 500:
+            sizes[1] += 1
+        elif count <= 750:
+            sizes[2] += 1
+        else:
+            sizes[3] += 1
+    # Plotting the bar plot
+    legend = ["0-250 words per Song", "251-500 words per Song", "501-750 words per Song", "751+ words per Song"]
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%', shadow=True, startangle=140, colors=plt.cm.Paired.colors)
+    plt.axis('equal')
+    plt.legend(legend, loc="best")
+    plt.title('Distribution of Items by Category')
+    plt.show()
+
 
 def main():
     cur, conn = set_up_database()
-    create_table(cur, conn)
     plot_lyrics_count(cur, conn)
+    plot_pie_chart(cur, conn)
 
 
 
