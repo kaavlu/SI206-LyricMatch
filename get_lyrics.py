@@ -50,7 +50,7 @@ def insert_lyrics(cur, conn):
     # Get 25 corresponding songs from db
     cur.execute(
         "SELECT * FROM Billboard "
-        "WHERE id >= ? "
+        "WHERE id > ? "
         "LIMIT 25",
         (start, )
     )
@@ -59,7 +59,16 @@ def insert_lyrics(cur, conn):
     billboard_songs = cur.fetchall()
 
     # use API to get lyrics
-    get_lyrics(billboard_songs)
+    lyrics_count = get_lyrics(billboard_songs)
+
+    # insert number of words in each song to database
+    for count in lyrics_count:
+        cur.execute(
+            "INSERT INTO Lyrics (count) VALUES (?)",
+            (count, )
+        )
+
+    conn.commit()
 
 
 def get_lyrics(songs):
@@ -75,42 +84,11 @@ def get_lyrics(songs):
         lyrics_count.append(
             int(len(lyrics.split()) // 0.3) if lyrics else average_lyric_count(lyrics_count))
 
-    print(lyrics_count)
-    print(len(lyrics_count))
+    return lyrics_count
 
 
 def average_lyric_count(lyrics_count):
     return sum(lyrics_count) // len(lyrics_count)
-
-# def billboard_to_lyrics(input_dict):
-#     # {rank1: {song: "title", artist: "artist", ...}, rank2:}
-#     for rank in input_dict:
-#         artist = input_dict[ranks]["song"]
-#         track = input_dict[ranks]["artist"]
-#         input_dict[ranks][lyrics] = generate_lyrics(artist, track)
-
-
-# def db_add_dict(input_dict, database_name='songs_database.db'):
-#     connection = sqlite3.connect(database_name)
-#     cursor = connection.cursor()
-
-#     cursor.execute('''
-#         CREATE TABLE IF NOT EXISTS songs (
-#             rank TEXT PRIMARY KEY,
-#             song TEXT,
-#             artist TEXT,
-#             lyrics TEXT
-#         )
-#     ''')
-
-#     for rank, data in input_dict.items():
-#         cursor.execute('''
-#             INSERT INTO songs (rank, song, artist, lyrics)
-#             VALUES (?, ?, ?, ?)
-#         ''', (rank, data["song"], data["artist"], data.get("lyrics", "")))
-
-#     connection.commit()
-#     connection.close()
 
 
 def main():
