@@ -2,6 +2,7 @@ import sqlite3
 import requests
 import json
 import os
+import math
 base_url = "https://api.musixmatch.com/ws/1.1/"
 api_key = "&apikey=9843f22c0731122bbc217d7f65785544"
 lyrics_matcher = "matcher.lyrics.get"
@@ -56,16 +57,30 @@ def insert_lyrics(cur, conn):
 
     # Query 25 billboard songs
     billboard_songs = cur.fetchall()
-    get_lyrics(billboard_songs)
+
     # use API to get lyrics
+    get_lyrics(billboard_songs)
 
 
 def get_lyrics(songs):
+
+    # counts number of words per song
+    lyrics_count = []
     for song in songs:
         artist, track = song[1], song[2]
         lyrics = generate_lyrics(artist, track)
-        print(len(lyrics.split()))
 
+        # add number of words in song to list
+        # if no data available, add average number of lyrics to not skew data
+        lyrics_count.append(
+            int(len(lyrics.split()) // 0.3) if lyrics else average_lyric_count(lyrics_count))
+
+    print(lyrics_count)
+    print(len(lyrics_count))
+
+
+def average_lyric_count(lyrics_count):
+    return sum(lyrics_count) // len(lyrics_count)
 
 # def billboard_to_lyrics(input_dict):
 #     # {rank1: {song: "title", artist: "artist", ...}, rank2:}
