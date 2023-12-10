@@ -35,6 +35,7 @@ def plot_lyrics_count(cur, conn):
     plt.tight_layout()
     plt.show()
 
+
 def plot_pie_chart(cur, conn):
     cur.execute('''
         SELECT Billboard.id, Lyrics.count
@@ -68,11 +69,28 @@ def plot_pie_chart(cur, conn):
     plt.title('Distribution of Items by Category')
     plt.show()
 
+def data_to_text(cur, conn):
+    cur.execute('''
+        SELECT Billboard.id, Billboard.artist, Billboard.song, Lyrics.count
+        FROM Billboard
+        JOIN Lyrics ON Billboard.id = Lyrics.id
+    ''')
+    data = cur.fetchall()
+    ids, artists, songs, counts = zip(*data)
+    lists = [ids, artists, songs, counts]
+    list_names = ["Ids", "Artists", "Songs", "Lyric Word Counts"]
+
+    # Writing data to a text file
+    with open('output.txt', 'w') as file:
+        for name, data in zip(list_names, lists):
+            file.write(f"{name} : {', '.join(map(str, data))}\n")
+    
 
 def main():
     cur, conn = set_up_database()
     plot_lyrics_count(cur, conn)
     plot_pie_chart(cur, conn)
+    data_to_text(cur, conn)
 
 
 
